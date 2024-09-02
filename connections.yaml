@@ -1,0 +1,852 @@
+openapi: 3.0.3
+info:
+  title: Mentoring API
+  description: API documentation for Mentoring Platform
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+servers:
+  - url: https://api.mentoringplatform.com/mentoring/v1
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    http1:
+      type: http
+      scheme: basic
+  schemas:
+    ChatInfo:
+      type: object
+      properties:
+        connection_id:
+          type: string
+          description: Unique identifier for the connection
+        initiator_user_id:
+          type: string
+          description: User ID of the initiator
+        receiver_user_id:
+          type: string
+          description: User ID of the receiver
+        is_initiator:
+          type: boolean
+          description: Indicates if the current user is the initiator
+        status:
+          type: string
+          enum:
+            - REQUESTED
+            - ACCEPTED
+            - REJECTED
+            - BLOCKED
+          description: Status of the connection request
+        meta:
+          type: object
+          properties:
+            chat:
+              type: object
+              properties:
+                initiated:
+                  type: boolean
+                  description: Indicates if the chat has been initiated
+                platform:
+                  type: string
+                  description: Chat platform used (e.g., Rocket.Chat)
+                room_id:
+                  type: string
+                  description: Unique identifier for the chat room
+                names:
+                  type: object
+                  additionalProperties:
+                    type: string
+                usernames:
+                  type: object
+                  additionalProperties:
+                    type: string
+            connection:
+              type: object
+              properties:
+                initial_message:
+                  type: string
+                  description: Initial message sent when the connection was initiated
+    ConnectionInitiate:
+      type: object
+      properties:
+        connection_id:
+          type: string
+          description: Unique identifier for the connection
+        initiator_user_id:
+          type: string
+          description: User ID of the initiator
+        receiver_user_id:
+          type: string
+          description: User ID of the receiver
+        is_initiator:
+          type: boolean
+          description: Indicates if the current user is the initiator
+        status:
+          type: string
+          enum:
+            - REQUESTED
+          description: Status of the connection request
+        meta:
+          type: object
+          properties:
+            chat:
+              type: object
+              properties:
+                initiated:
+                  type: boolean
+                  description: Indicates if the chat has been initiated
+            connection:
+              type: object
+              properties:
+                initial_message:
+                  type: string
+                  description: Initial message sent when the connection was initiated
+    ChatStart:
+      type: object
+      properties:
+        auth_token:
+          type: string
+          description: Rocket.Chat authentication token of the current user
+        _id:
+          type: string
+          description: Rocket.Chat user ID of the initiator
+        room_id:
+          type: string
+          description: Unique identifier for the chat room
+        names:
+          type: array
+          items:
+            type: string
+          description: List of display names of users in the chat
+    ConnectionList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConnectionInitiate'
+        count:
+          type: integer
+          description: Total number of connection requests
+    ConnectionAccept:
+      type: object
+      properties:
+        connection_id:
+          type: string
+          description: Unique identifier for the connection
+        initiator_user_id:
+          type: string
+          description: User ID of the initiator
+        receiver_user_id:
+          type: string
+          description: User ID of the receiver
+        is_initiator:
+          type: boolean
+          description: Indicates if the current user is the initiator
+        status:
+          type: string
+          enum:
+            - ACCEPTED
+          description: Status of the connection request
+        meta:
+          type: object
+          properties:
+            chat:
+              type: object
+              properties:
+                initiated:
+                  type: boolean
+                  description: Indicates if the chat has been initiated
+                platform:
+                  type: string
+                  description: Chat platform used (e.g., Rocket.Chat)
+                room_id:
+                  type: string
+                  description: Unique identifier for the chat room
+                user_ids:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Map of user IDs to Rocket.Chat user IDs
+                usernames:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Map of user IDs to Rocket.Chat usernames
+            connection:
+              type: object
+              properties:
+                initial_message:
+                  type: string
+                  description: Initial message sent when the connection was initiated
+    ConnectionReject:
+      type: object
+      properties:
+        connection_id:
+          type: string
+          description: Unique identifier for the connection
+        initiator_user_id:
+          type: string
+          description: User ID of the initiator
+        receiver_user_id:
+          type: string
+          description: User ID of the receiver
+        is_initiator:
+          type: boolean
+          description: Indicates if the current user is the initiator
+        status:
+          type: string
+          enum:
+            - REJECTED
+          description: Status of the connection request
+        meta:
+          type: object
+          properties:
+            chat:
+              type: object
+              properties:
+                initiated:
+                  type: boolean
+                  description: Indicates if the chat has been initiated
+            connection:
+              type: object
+              properties:
+                initial_message:
+                  type: string
+                  description: Initial message sent when the connection was initiated
+    ChatDelete:
+      type: object
+      properties:
+        connection_id:
+          type: string
+          description: Unique identifier for the connection
+        initiator_user_id:
+          type: string
+          description: User ID of the initiator
+        receiver_user_id:
+          type: string
+          description: User ID of the receiver
+        is_initiator:
+          type: boolean
+          description: Indicates if the current user is the initiator
+        status:
+          type: string
+          enum:
+            - ACCEPTED
+          description: Status of the connection request
+        meta:
+          type: object
+          properties:
+            chat:
+              type: object
+              properties:
+                initiated:
+                  type: boolean
+                  description: Indicates if the chat has been initiated
+                platform:
+                  type: string
+                  description: Chat platform used (e.g., Rocket.Chat)
+                room_id:
+                  type: string
+                  description: Unique identifier for the chat room
+                user_ids:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Map of user IDs to Rocket.Chat user IDs
+                usernames:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Map of user IDs to Rocket.Chat usernames
+                deleted:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    properties:
+                      status:
+                        type: boolean
+                        description: Indicates if the chat was deleted
+                      delete_at:
+                        type: string
+                        format: date-time
+                        description: Timestamp of when the chat was deleted
+            connection:
+              type: object
+              properties:
+                initial_message:
+                  type: string
+                  description: Initial message sent when the connection was initiated
+paths:
+  /mentoring/v1/connections/get-info:
+    post:
+      summary: Get Chat Information
+      operationId: getChatInfo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  description: MentorEd User ID
+              required: []
+            examples:
+              example1:
+                value:
+                  user_id: '1'
+      responses:
+        '200':
+          description: Chat Information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  initiator_user_id:
+                    type: string
+                  receiver_user_id:
+                    type: string
+                  is_initiator:
+                    type: boolean
+                  status:
+                    type: string
+                    enum:
+                      - REQUESTED
+                      - ACCEPTED
+                      - REJECTED
+                    example: REQUESTED
+                  receiver_user_details:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      image:
+                        type: string
+                      user_roles:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            title:
+                              type: string
+                            user_type:
+                              type: number
+                            status:
+                              type: string
+                            organization_id:
+                              type: string
+                            visibility:
+                              type: string
+                  meta:
+                    type: object
+                    properties:
+                      chat:
+                        type: object
+                        properties:
+                          initiated:
+                            type: boolean
+                          platform:
+                            type: string
+                          room_id:
+                            type: string
+                      connection:
+                        type: object
+                        properties:
+                          initial_message:
+                            type: string
+              examples:
+                example1:
+                  value:
+                    initiator_user_id: '1'
+                    receiver_user_id: '2'
+                    is_initiator: true
+                    status: REQUESTED
+                    receiver_user_details:
+                      name: Nevil
+                      image: /url
+                      user_roles:
+                        - id: '2'
+                          title: mentor
+                          user_type: 0
+                          status: ACTIVE
+                          organization_id: '1'
+                          visibility: PUBLIC
+                    meta:
+                      chat:
+                        initiated: true
+                        platform: rocket.chat
+                        room_id: <rocket.chat rid>
+                      connection:
+                        initial_message: I would like to chat with you
+        '404':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  responseCode:
+                    type: string
+                  error:
+                    type: array
+                    items:
+                      type: string
+                  meta:
+                    type: object
+                    properties:
+                      correlation:
+                        type: string
+                  message:
+                    type: string
+              examples:
+                example1:
+                  value:
+                    responseCode: CLIENT_ERROR
+                    error: []
+                    meta:
+                      correlation: 36ccf8da-8f52-438c-b41b-966859969f89
+                    message: User or connection not found.
+      description: ''
+      parameters:
+        - in: header
+          name: X-auth-token
+          description: >-
+            To use this API, you require an x-auth-token. This token is
+            available in the login API Response.
+          schema:
+            type: string
+  /mentoring/v1/connections/initiate:
+    post:
+      summary: Initiate connection
+      operationId: initiateConnection
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  description: mentor user id
+                message:
+                  type: string
+                  description: Default message or custom message
+              required: []
+            examples:
+              example1:
+                value:
+                  user_id: '1'
+                  message: I would like to connect with you
+      responses:
+        '200':
+          description: Connection Initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  initiator_user_id:
+                    type: string
+                    description: 'Requestor user id '
+                  receiver_user_id:
+                    type: string
+                    description: Receiver user id
+                  is_initiator:
+                    type: boolean
+                    description: initiator is user or not
+                  status:
+                    type: string
+                    description: status of the connection initiated
+                  meta:
+                    type: object
+                    properties:
+                      chat:
+                        type: object
+                        properties:
+                          initiated:
+                            type: boolean
+                            description: is connection initiated or not
+                        description: chat details
+                      connection:
+                        type: object
+                        properties:
+                          initial_message:
+                            type: string
+                            description: >-
+                              initial message for receiver , custom or default
+                              messages 
+                        description: connections deatils
+                    description: chat and connections related deatils
+              examples:
+                example1:
+                  value:
+                    initiator_user_id: '1'
+                    receiver_user_id: '2'
+                    is_initiator: true
+                    status: REQUESTED
+                    meta:
+                      chat:
+                        initiated: true
+                      connection:
+                        initial_message: I would like to connect with you
+      description: ''
+      parameters:
+        - in: header
+          name: X-auth-token
+          description: >-
+            To use this API, you require an x-auth-token. This token is
+            available in the login API Response.
+          schema:
+            type: string
+  /chat/start:
+    post:
+      summary: Start Chat
+      operationId: startChat
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  description: MentorEd User ID of the receiver
+              required: []
+            examples:
+              example1:
+                value:
+                  user_id: '2'
+      responses:
+        '200':
+          description: Chat Started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auth_token:
+                    type: string
+                  _id:
+                    type: string
+                  room_id:
+                    type: string
+                  names:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                example1:
+                  value:
+                    auth_token: auth Token
+                    _id: '1'
+                    room_id: <room_id from chat>
+                    names:
+                      - Suman
+      description: ''
+  /mentoring/v1/connections/list:
+    get:
+      summary: List Connection Requests
+      operationId: listConnections
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - REQUESTED
+              - ACCEPTED
+              - REJECTED
+            description: BullMQ method for purging jobs
+            example: REQUESTED
+          description: Status of the connection requests to filter
+        - in: query
+          name: pageNo
+          schema:
+            type: integer
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Number of items per page
+        - in: header
+          name: X-auth-token
+          description: >-
+            To use this API, you require an x-auth-token. This token is
+            available in the login API Response.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of Connection Requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        connection_id:
+                          type: string
+                        initiator_user_id:
+                          type: string
+                        receiver_user_id:
+                          type: string
+                        receiver_user_details:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            image:
+                              type: string
+                            user_roles:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  title:
+                                    type: string
+                                  user_type:
+                                    type: number
+                                  status:
+                                    type: string
+                                  organization_id:
+                                    type: string
+                                  visibility:
+                                    type: string
+                        is_initiator:
+                          type: boolean
+                        status:
+                          type: string
+                        meta:
+                          type: object
+                          properties:
+                            chat:
+                              type: object
+                              properties:
+                                initiated:
+                                  type: boolean
+                            connection:
+                              type: object
+                              properties:
+                                initial_message:
+                                  type: string
+                  count:
+                    type: number
+              examples:
+                example1:
+                  value:
+                    data:
+                      - connection_id: '1234'
+                        initiator_user_id: '1'
+                        receiver_user_id: '2'
+                        receiver_user_details:
+                          name: Nevil
+                          image: /url
+                          user_roles:
+                            - id: '2'
+                              title: mentor
+                              user_type: 0
+                              status: ACTIVE
+                              organization_id: '1'
+                              visibility: PUBLIC
+                        is_initiator: true
+                        status: REQUESTED/ACCEPTED
+                        meta:
+                          chat:
+                            initiated: true
+                          connection:
+                            initial_message: I would like to chat with you
+                    count: 1
+      description: ''
+  /mentoring/v1/connections/accept:
+    post:
+      summary: Accept Connection Request
+      operationId: acceptConnection
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  description: initiator user id
+              required: []
+            examples:
+              example1:
+                value:
+                  user_id: '1'
+      responses:
+        '200':
+          description: Connection Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  meta:
+                    type: object
+                    properties:
+                      chat:
+                        type: object
+                        properties:
+                          initiated:
+                            type: boolean
+                      connection:
+                        type: object
+                        properties:
+                          initial_message:
+                            type: string
+              examples:
+                example1:
+                  value:
+                    status: ACCEPTED
+                    message: >-
+                      You have accepted this message request and 'Mentee Name'
+                      is added to your connections
+                    meta:
+                      chat:
+                        initiated: true
+                      connection:
+                        initial_message: I would like to chat with you
+      description: ''
+      parameters:
+        - in: header
+          name: X-auth-token
+          description: >-
+            To use this API, you require an x-auth-token. This token is
+            available in the login API Response.
+          schema:
+            type: string
+  /mentoring/v1/connections/reject:
+    post:
+      summary: Reject Connection Request
+      operationId: rejectConnection
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  description: initiator user id
+              required: []
+            examples:
+              example1:
+                value:
+                  user_id: '1'
+      responses:
+        '200':
+          description: Connection Rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: Status of the connection
+                  message:
+                    type: string
+                    description: Message for rejection
+                  meta:
+                    type: object
+                    properties:
+                      chat:
+                        type: object
+                        properties:
+                          initiated:
+                            type: boolean
+                            description: is connection initiated or not
+                        description: chat details
+                      connection:
+                        type: object
+                        properties:
+                          initial_message:
+                            type: string
+                            description: >-
+                              initial message for receiver , custom or default
+                              messages 
+                        description: connection details
+                    description: chat and connections related details
+              examples:
+                example1:
+                  value:
+                    status: REJECTED
+                    message: You have rejected this message request
+                    meta:
+                      chat:
+                        initiated: true
+                      connection:
+                        initial_message: I would like to chat with you
+      description: ''
+      parameters:
+        - in: header
+          name: X-auth-token
+          description: >-
+            To use this API, you require an x-auth-token. This token is
+            available in the login API Response.
+          schema:
+            type: string
+  /chat/delete:
+    post:
+      summary: Delete Chat
+      operationId: deleteChat
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                connection_id:
+                  type: string
+                  description: Unique identifier for the connection
+      responses:
+        '200':
+          description: Chat Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatDelete'
+security:
+  - bearerAuth: []
