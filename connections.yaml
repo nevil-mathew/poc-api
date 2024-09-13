@@ -311,84 +311,87 @@ paths:
               schema:
                 type: object
                 properties:
-                  initiator_user_id:
+                  responseCode:
                     type: string
-                  receiver_user_id:
+                  message:
                     type: string
-                  is_initiator:
-                    type: boolean
-                  status:
-                    type: string
-                    enum:
-                      - REQUESTED
-                      - ACCEPTED
-                      - REJECTED
-                    example: REQUESTED
-                  receiver_user_details:
+                  result:
                     type: object
                     properties:
-                      name:
+                      user_id:
                         type: string
-                      image:
+                      friend_id:
                         type: string
-                      user_roles:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                            title:
-                              type: string
-                            user_type:
-                              type: number
-                            status:
-                              type: string
-                            organization_id:
-                              type: string
-                            visibility:
-                              type: string
-                  meta:
-                    type: object
-                    properties:
-                      chat:
+                      is_initiator:
+                        type: boolean
+                        depreciated: true
+                      status:
+                        type: string
+                      receiver_user_details:
                         type: object
                         properties:
-                          initiated:
-                            type: boolean
-                          platform:
+                          name:
                             type: string
-                          room_id:
+                          image:
                             type: string
-                      connection:
+                          user_roles:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                title:
+                                  type: string
+                                user_type:
+                                  type: number
+                                status:
+                                  type: string
+                                organization_id:
+                                  type: string
+                                visibility:
+                                  type: string
+                      meta:
                         type: object
                         properties:
-                          initial_message:
-                            type: string
+                          chat:
+                            type: object
+                            properties:
+                              initiated:
+                                type: boolean
+                              room_id:
+                                type: string
+                          connection:
+                            type: object
+                            properties:
+                              initial_message:
+                                type: string
               examples:
                 example1:
                   value:
-                    initiator_user_id: '1'
-                    receiver_user_id: '2'
-                    is_initiator: true
-                    status: REQUESTED
-                    receiver_user_details:
-                      name: Nevil
-                      image: /url
-                      user_roles:
-                        - id: '2'
-                          title: mentor
-                          user_type: 0
-                          status: ACTIVE
-                          organization_id: '1'
-                          visibility: PUBLIC
-                    meta:
-                      chat:
-                        initiated: true
-                        platform: rocket.chat
-                        room_id: <rocket.chat rid>
-                      connection:
-                        initial_message: I would like to chat with you
+                    responseCode: OK
+                    message: Connection info.
+                    result:
+                      user_id: '1'
+                      friend_id: '2'
+                      is_initiator: true
+                      status: REQUESTED
+                      receiver_user_details:
+                        name: Nevil
+                        image: /url
+                        user_roles:
+                          - id: '2'
+                            title: mentor
+                            user_type: 0
+                            status: ACTIVE
+                            organization_id: '1'
+                            visibility: PUBLIC
+                      meta:
+                        chat:
+                          initiated: true
+                          room_id: <rocket.chat rid>
+                        connection:
+                          initial_message: I would like to chat with you
         '404':
           description: ''
           headers: {}
@@ -460,50 +463,51 @@ paths:
               schema:
                 type: object
                 properties:
-                  initiator_user_id:
+                  responseCode:
                     type: string
-                    description: 'Requestor user id '
-                  receiver_user_id:
+                  message:
                     type: string
-                    description: Receiver user id
-                  is_initiator:
-                    type: boolean
-                    description: initiator is user or not
-                  status:
-                    type: string
-                    description: status of the connection initiated
-                  meta:
+                  result:
                     type: object
                     properties:
-                      chat:
+                      user_id:
+                        type: string
+                      friend_id:
+                        type: string
+                      is_initiator:
+                        type: boolean
+                        depreciated: true
+                      status:
+                        type: string
+                      meta:
                         type: object
                         properties:
-                          initiated:
-                            type: boolean
-                            description: is connection initiated or not
-                        description: chat details
-                      connection:
-                        type: object
-                        properties:
-                          initial_message:
-                            type: string
-                            description: >-
-                              initial message for receiver , custom or default
-                              messages 
-                        description: connections deatils
-                    description: chat and connections related deatils
+                          chat:
+                            type: object
+                            properties:
+                              initiated:
+                                type: boolean
+                          connection:
+                            type: object
+                            properties:
+                              initial_message:
+                                type: string
+                    required: []
               examples:
                 example1:
                   value:
-                    initiator_user_id: '1'
-                    receiver_user_id: '2'
-                    is_initiator: true
-                    status: REQUESTED
-                    meta:
-                      chat:
-                        initiated: true
-                      connection:
-                        initial_message: I would like to connect with you
+                    responseCode: OK
+                    message: Connection initiated successfully.
+                    result:
+                      user_id: '1'
+                      friend_id: '2'
+                      is_initiator: true
+                      status: REQUESTED
+                      meta:
+                        chat:
+                          initiated: true
+                        connection:
+                          initial_message: I would like to connect with you
       description: ''
       parameters:
         - in: header
@@ -542,24 +546,22 @@ paths:
               schema:
                 type: object
                 properties:
-                  auth_token:
+                  responseCode:
                     type: string
-                  _id:
+                  message:
                     type: string
-                  room_id:
-                    type: string
-                  names:
-                    type: array
-                    items:
-                      type: string
+                  result:
+                    type: object
+                    properties:
+                      room_id:
+                        type: string
               examples:
                 example1:
                   value:
-                    auth_token: auth Token
-                    _id: '1'
-                    room_id: <room_id from chat>
-                    names:
-                      - Suman
+                    responseCode: OK
+                    message: Chat room initiated successfully.
+                    result:
+                      room_id: 2PAGGMRazaiBD5HnxmWLAWy4rDXf4gsYEm
       description: ''
   /mentoring/v1/connections/list:
     get:
@@ -604,85 +606,95 @@ paths:
               schema:
                 type: object
                 properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        connection_id:
-                          type: string
-                        initiator_user_id:
-                          type: string
-                        receiver_user_id:
-                          type: string
-                        receiver_user_details:
+                  responseCode:
+                    type: string
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
                           type: object
                           properties:
-                            name:
+                            connection_id:
                               type: string
-                            image:
+                            user_id:
                               type: string
-                            user_roles:
-                              type: array
-                              items:
-                                type: object
-                                properties:
-                                  id:
-                                    type: string
-                                  title:
-                                    type: string
-                                  user_type:
-                                    type: number
-                                  status:
-                                    type: string
-                                  organization_id:
-                                    type: string
-                                  visibility:
-                                    type: string
-                        is_initiator:
-                          type: boolean
-                        status:
-                          type: string
-                        meta:
-                          type: object
-                          properties:
-                            chat:
+                            friend_id:
+                              type: string
+                            receiver_user_details:
                               type: object
                               properties:
-                                initiated:
-                                  type: boolean
-                            connection:
-                              type: object
-                              properties:
-                                initial_message:
+                                name:
                                   type: string
-                  count:
-                    type: number
+                                image:
+                                  type: string
+                                user_roles:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      title:
+                                        type: string
+                                      user_type:
+                                        type: number
+                                      status:
+                                        type: string
+                                      organization_id:
+                                        type: string
+                                      visibility:
+                                        type: string
+                            is_initiator:
+                              type: boolean
+                            status:
+                              type: string
+                            meta:
+                              type: object
+                              properties:
+                                chat:
+                                  type: object
+                                  properties:
+                                    initiated:
+                                      type: boolean
+                                connection:
+                                  type: object
+                                  properties:
+                                    initial_message:
+                                      type: string
+                      count:
+                        type: number
               examples:
                 example1:
                   value:
-                    data:
-                      - connection_id: '1234'
-                        initiator_user_id: '1'
-                        receiver_user_id: '2'
-                        receiver_user_details:
-                          name: Nevil
-                          image: /url
-                          user_roles:
-                            - id: '2'
-                              title: mentor
-                              user_type: 0
-                              status: ACTIVE
-                              organization_id: '1'
-                              visibility: PUBLIC
-                        is_initiator: true
-                        status: REQUESTED/ACCEPTED
-                        meta:
-                          chat:
-                            initiated: true
-                          connection:
-                            initial_message: I would like to chat with you
-                    count: 1
+                    responseCode: OK
+                    message: Connection list
+                    result:
+                      data:
+                        - connection_id: '1234'
+                          user_id: '1'
+                          friend_id: '2'
+                          receiver_user_details:
+                            name: Nevil
+                            image: /url
+                            user_roles:
+                              - id: '2'
+                                title: mentor
+                                user_type: 0
+                                status: ACTIVE
+                                organization_id: '1'
+                                visibility: PUBLIC
+                          is_initiator: true
+                          status: REQUESTED
+                          meta:
+                            chat:
+                              initiated: true
+                            connection:
+                              initial_message: I would like to chat with you
+                      count: 1
       description: ''
   /mentoring/v1/connections/accept:
     post:
@@ -848,5 +860,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatDelete'
+      description: ''
+      deprecated: true
 security:
   - bearerAuth: []
