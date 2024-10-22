@@ -852,7 +852,7 @@ paths:
               properties:
                 connection_id:
                   type: string
-                  description: Unique identifier for the connection
+                  description: Unique identifier for the connectionn
       responses:
         '200':
           description: Chat Deleted
