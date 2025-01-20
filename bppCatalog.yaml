@@ -1,0 +1,960 @@
+openapi: 3.0.3
+info:
+  title: BPP Catalog Service APIs
+  description: >-
+    API specification for the BPP Catalog Service that manages JSON
+    transformation templates 
+
+    for the BECKN DSEP protocol. This service provides CRUD operations for
+    managing templates 
+
+    that transform data between internal format and BECKN DSEP protocol format.
+  version: 1.0.0
+  contact:
+    name: BPP Catalog Service Team
+    email: team@example.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: http://localhost:3000
+    description: Local Development
+  - url: https://api.staging.example.com
+    description: Staging Environment
+  - url: https://api.example.com
+    description: Production Environment
+tags:
+  - name: Templates
+    description: Operations for managing JSON transformation templates
+  - name: Session
+    description: Mentoring session related APIs
+    externalDocs:
+      description: ''
+      url: ''
+components:
+  schemas:
+    Template:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the template
+          readOnly: true
+        code:
+          type: string
+          description: Unique code identifier for the template
+          example: mentorTemplate
+          minLength: 3
+          maxLength: 50
+        name:
+          type: string
+          description: Display name for the template
+          example: Mentor Profile Template
+        description:
+          type: string
+          description: Detailed description of the template's purpose
+          example: Transforms internal mentor data to BECKN DSEP format
+        template_object:
+          type: object
+          description: JSON transformation template object
+        version:
+          type: string
+          description: Version number of the template
+          example: 1.0.0
+          pattern: ^\d+\.\d+\.\d+$
+        is_active:
+          type: boolean
+          description: Whether the template is currently active
+          default: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - code
+        - template_object
+        - version
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+  parameters:
+    templateId:
+      name: id
+      in: path
+      description: Template UUID
+      required: true
+      schema:
+        type: string
+        format: uuid
+paths:
+  /api/templates:
+    get:
+      tags:
+        - Templates
+      summary: List Templates
+      description: Retrieve a paginated list of templates
+      operationId: listTemplates
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: is_active
+          in: query
+          description: Filter by active status
+          schema:
+            type: boolean
+        - name: code
+          in: query
+          description: Filter by template code
+          schema:
+            type: string
+        - name: version
+          in: query
+          description: Filter by version
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Template'
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      pages:
+                        type: integer
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Templates
+      summary: Create Template
+      description: Create a new JSON transformation template
+      operationId: createTemplate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Template'
+            examples:
+              mentorTemplate:
+                value:
+                  code: mentorTemplate
+                  name: Mentor Profile Template
+                  description: Transforms internal mentor data to BECKN DSEP format
+                  version: 1.0.0
+                  template_object:
+                    person:
+                      id: '{{mentor.user_id}}'
+                      name: '{{mentor.name}}'
+                      image:
+                        url: '{{mentor.image}}'
+                      gender: '{{mentor.gender}}'
+                    rating: '{{mentor.rating.average}}'
+                  is_active: true
+      responses:
+        '201':
+          description: Template created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Template code already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/templates/{id}:
+    get:
+      tags:
+        - Templates
+      summary: Get Template
+      description: Retrieve a specific template by ID
+      operationId: getTemplate
+      parameters:
+        - $ref: '#/components/parameters/templateId'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '404':
+          description: Template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - Templates
+      summary: Update Template
+      description: Update an existing template
+      operationId: updateTemplate
+      parameters:
+        - $ref: '#/components/parameters/templateId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Template'
+      responses:
+        '200':
+          description: Template updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - Templates
+      summary: Delete Template
+      description: Soft delete a template by setting is_active to false
+      operationId: deleteTemplate
+      parameters:
+        - $ref: '#/components/parameters/templateId'
+      responses:
+        '200':
+          description: Template deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '404':
+          description: Template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/templates/{id}/test:
+    post:
+      tags:
+        - Templates
+      summary: Test Template
+      description: Test a template with sample data
+      operationId: testTemplate
+      parameters:
+        - $ref: '#/components/parameters/templateId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                input_data:
+                  type: object
+                  description: Sample input data to test the template
+      responses:
+        '200':
+          description: Template test successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  input:
+                    type: object
+                  output:
+                    type: object
+                  execution_time:
+                    type: number
+                    format: float
+                    description: Template execution time in milliseconds
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/sessions:
+    post:
+      summary: Create Sessions
+      description: ''
+      operationId: ''
+      tags: &ref_0
+        - Session
+      parameters: &ref_1 []
+      responses: &ref_2
+        '200':
+          description: OK
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  session_reschedule:
+                    type: number
+                  is_feedback_skipped:
+                    type: boolean
+                  seats_remaining:
+                    type: number
+                  seats_limit:
+                    type: number
+                  type:
+                    type: object
+                    properties:
+                      value:
+                        type: string
+                      label:
+                        type: string
+                  id:
+                    type: number
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  start_date:
+                    type: string
+                  end_date:
+                    type: string
+                  recommended_for:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        value:
+                          type: string
+                        label:
+                          type: string
+                      required:
+                        - value
+                        - label
+                  categories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        value:
+                          type: string
+                        label:
+                          type: string
+                      required:
+                        - value
+                        - label
+                  medium:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        value:
+                          type: string
+                        label:
+                          type: string
+                  image:
+                    type: array
+                    items:
+                      type: string
+                  time_zone:
+                    type: string
+                  meeting_info:
+                    type: object
+                    properties:
+                      link:
+                        type: string
+                      meta:
+                        type: object
+                        properties: {}
+                      value:
+                        type: string
+                      platform:
+                        type: string
+                  created_by:
+                    type: string
+                  updated_by:
+                    type: string
+                  mentor_id:
+                    type: string
+                  mentor_name:
+                    type: string
+                  status:
+                    type: object
+                    properties:
+                      value:
+                        type: string
+                      label:
+                        type: string
+                  meta:
+                    type: 'null'
+                  mentor_organization_id:
+                    type: string
+                  visibility:
+                    type: string
+                  visible_to_organizations:
+                    type: array
+                    items:
+                      type: string
+                  mentee_feedback_question_set:
+                    type: string
+                  mentor_feedback_question_set:
+                    type: string
+                  updated_at:
+                    type: string
+                  created_at:
+                    type: string
+                  mentee_password:
+                    type: 'null'
+                  mentor_password:
+                    type: 'null'
+                  started_at:
+                    type: 'null'
+                  share_link:
+                    type: 'null'
+                  completed_at:
+                    type: 'null'
+                  deleted_at:
+                    type: 'null'
+                  mentor:
+                    type: object
+                    properties:
+                      user_id:
+                        type: string
+                      designation:
+                        type: array
+                        items:
+                          type: string
+                      area_of_expertise:
+                        type: array
+                        items:
+                          type: string
+                      education_qualification:
+                        type: string
+                      rating:
+                        type: 'null'
+                      meta:
+                        type: 'null'
+                      stats:
+                        type: 'null'
+                      tags:
+                        type: 'null'
+                      configs:
+                        type: 'null'
+                      visible_to_organizations:
+                        type: array
+                        items:
+                          type: string
+                      external_session_visibility:
+                        type: string
+                      custom_entity_text:
+                        type: 'null'
+                      experience:
+                        type: 'null'
+                      organization_id:
+                        type: string
+                      external_mentee_visibility:
+                        type: string
+                      mentee_visibility:
+                        type: string
+                      external_mentor_visibility:
+                        type: string
+                      mentor_visibility:
+                        type: string
+                      name:
+                        type: string
+                      email:
+                        type: string
+                      phone:
+                        type: 'null'
+                      is_mentor:
+                        type: boolean
+                      settings:
+                        type: object
+                        properties:
+                          chat_enabled:
+                            type: boolean
+                      image:
+                        type: 'null'
+                      gender:
+                        type: string
+                      created_at:
+                        type: string
+                      updated_at:
+                        type: string
+                      deleted_at:
+                        type: 'null'
+            examples:
+              Create Session:
+                value:
+                  - session_reschedule: 0
+                    is_feedback_skipped: false
+                    seats_remaining: 5
+                    seats_limit: 5
+                    type:
+                      value: PUBLIC
+                      label: Public
+                    id: 2
+                    title: Introduction to Python Male
+                    description: >-
+                      Python is a widely used general-purpose, high level
+                      programming language. It was created by Guido van Rossum
+                      in 1991 and further developed by the Python Software
+                      Foundation. It was designed with an emphasis on code
+                      readability, and its syntax allows programmers to express
+                      their concepts in fewer lines of code.
+                    start_date: '1737321822'
+                    end_date: '1737323622'
+                    recommended_for:
+                      - value: beo
+                        label: Block education officer
+                      - value: co
+                        label: Cluster officials
+                    categories:
+                      - value: educational_leadership
+                        label: Educational leadership
+                      - value: communication
+                        label: Communication
+                    medium:
+                      - value: en_in
+                        label: English
+                    image:
+                      - session/undefined-1701770609877-3720230404141603_webp
+                    time_zone: Asia/Calcutta
+                    meeting_info:
+                      link: https://meet.google.com/xxx-yyyy-zzz
+                      meta: {}
+                      value: Gmeet
+                      platform: Google meet
+                    created_by: '1'
+                    updated_by: '1'
+                    mentor_id: '1'
+                    mentor_name: Nevil m
+                    status:
+                      value: PUBLISHED
+                      label: Upcoming
+                    meta: null
+                    mentor_organization_id: '1'
+                    visibility: CURRENT
+                    visible_to_organizations:
+                      - '1'
+                    mentee_feedback_question_set: MENTEE_QS1
+                    mentor_feedback_question_set: MENTOR_QS2
+                    updated_at: '2025-01-18T10:05:11.131Z'
+                    created_at: '2025-01-18T10:05:11.131Z'
+                    mentee_password: null
+                    mentor_password: null
+                    started_at: null
+                    share_link: null
+                    completed_at: null
+                    deleted_at: null
+                    mentor:
+                      user_id: '1'
+                      designation:
+                        - beo
+                        - deo
+                      area_of_expertise:
+                        - educational_leadership
+                        - sqaa
+                      education_qualification: MBA
+                      rating: null
+                      meta: null
+                      stats: null
+                      tags: null
+                      configs: null
+                      visible_to_organizations:
+                        - '1'
+                      external_session_visibility: CURRENT
+                      custom_entity_text: null
+                      experience: null
+                      organization_id: '1'
+                      external_mentee_visibility: CURRENT
+                      mentee_visibility: CURRENT
+                      external_mentor_visibility: CURRENT
+                      mentor_visibility: CURRENT
+                      name: Nevil m
+                      email: nevil@tunerlabs.com
+                      phone: null
+                      is_mentor: true
+                      settings:
+                        chat_enabled: true
+                      image: null
+                      gender: male
+                      created_at: '2025-01-02T20:15:39.878Z'
+                      updated_at: '2025-01-02T20:15:39.878Z'
+                      deleted_at: null
+  /api/sessions/{id}:
+    put:
+      summary: Update Sessions
+      description: ''
+      operationId: ''
+      tags: *ref_0
+      parameters: *ref_1
+      responses: *ref_2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_reschedule:
+                  type: number
+                is_feedback_skipped:
+                  type: boolean
+                seats_remaining:
+                  type: number
+                seats_limit:
+                  type: number
+                type:
+                  type: object
+                  properties:
+                    value:
+                      type: string
+                    label:
+                      type: string
+                id:
+                  type: number
+                title:
+                  type: string
+                description:
+                  type: string
+                start_date:
+                  type: string
+                end_date:
+                  type: string
+                recommended_for:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      value:
+                        type: string
+                      label:
+                        type: string
+                    required:
+                      - value
+                      - label
+                categories:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      value:
+                        type: string
+                      label:
+                        type: string
+                    required:
+                      - value
+                      - label
+                medium:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      value:
+                        type: string
+                      label:
+                        type: string
+                image:
+                  type: array
+                  items:
+                    type: string
+                time_zone:
+                  type: string
+                meeting_info:
+                  type: object
+                  properties:
+                    link:
+                      type: string
+                    meta:
+                      type: object
+                      properties: {}
+                    value:
+                      type: string
+                    platform:
+                      type: string
+                created_by:
+                  type: string
+                updated_by:
+                  type: string
+                mentor_id:
+                  type: string
+                mentor_name:
+                  type: string
+                status:
+                  type: object
+                  properties:
+                    value:
+                      type: string
+                    label:
+                      type: string
+                meta:
+                  type: 'null'
+                mentor_organization_id:
+                  type: string
+                visibility:
+                  type: string
+                visible_to_organizations:
+                  type: array
+                  items:
+                    type: string
+                mentee_feedback_question_set:
+                  type: string
+                mentor_feedback_question_set:
+                  type: string
+                updated_at:
+                  type: string
+                created_at:
+                  type: string
+                mentee_password:
+                  type: 'null'
+                mentor_password:
+                  type: 'null'
+                started_at:
+                  type: 'null'
+                share_link:
+                  type: 'null'
+                completed_at:
+                  type: 'null'
+                deleted_at:
+                  type: 'null'
+                mentor:
+                  type: object
+                  properties:
+                    user_id:
+                      type: string
+                    designation:
+                      type: array
+                      items:
+                        type: string
+                    area_of_expertise:
+                      type: array
+                      items:
+                        type: string
+                    education_qualification:
+                      type: string
+                    rating:
+                      type: 'null'
+                    meta:
+                      type: 'null'
+                    stats:
+                      type: 'null'
+                    tags:
+                      type: 'null'
+                    configs:
+                      type: 'null'
+                    visible_to_organizations:
+                      type: array
+                      items:
+                        type: string
+                    external_session_visibility:
+                      type: string
+                    custom_entity_text:
+                      type: 'null'
+                    experience:
+                      type: 'null'
+                    organization_id:
+                      type: string
+                    external_mentee_visibility:
+                      type: string
+                    mentee_visibility:
+                      type: string
+                    external_mentor_visibility:
+                      type: string
+                    mentor_visibility:
+                      type: string
+                    name:
+                      type: string
+                    email:
+                      type: string
+                    phone:
+                      type: 'null'
+                    is_mentor:
+                      type: boolean
+                    settings:
+                      type: object
+                      properties:
+                        chat_enabled:
+                          type: boolean
+                    image:
+                      type: 'null'
+                    gender:
+                      type: string
+                    created_at:
+                      type: string
+                    updated_at:
+                      type: string
+                    deleted_at:
+                      type: 'null'
+            examples:
+              Create Session:
+                value:
+                  session_reschedule: 0
+                  is_feedback_skipped: false
+                  seats_remaining: 5
+                  seats_limit: 5
+                  type:
+                    value: PUBLIC
+                    label: Public
+                  id: 2
+                  title: Introduction to Python Male
+                  description: >-
+                    Python is a widely used general-purpose, high level
+                    programming language. It was created by Guido van Rossum in
+                    1991 and further developed by the Python Software
+                    Foundation. It was designed with an emphasis on code
+                    readability, and its syntax allows programmers to express
+                    their concepts in fewer lines of code.
+                  start_date: '1737321822'
+                  end_date: '1737323622'
+                  recommended_for:
+                    - value: beo
+                      label: Block education officer
+                    - value: co
+                      label: Cluster officials
+                  categories:
+                    - value: educational_leadership
+                      label: Educational leadership
+                    - value: communication
+                      label: Communication
+                  medium:
+                    - value: en_in
+                      label: English
+                  image:
+                    - session/undefined-1701770609877-3720230404141603_webp
+                  time_zone: Asia/Calcutta
+                  meeting_info:
+                    link: https://meet.google.com/xxx-yyyy-zzz
+                    meta: {}
+                    value: Gmeet
+                    platform: Google meet
+                  created_by: '1'
+                  updated_by: '1'
+                  mentor_id: '1'
+                  mentor_name: Nevil m
+                  status:
+                    value: PUBLISHED
+                    label: Upcoming
+                  meta: null
+                  mentor_organization_id: '1'
+                  visibility: CURRENT
+                  visible_to_organizations:
+                    - '1'
+                  mentee_feedback_question_set: MENTEE_QS1
+                  mentor_feedback_question_set: MENTOR_QS2
+                  updated_at: '2025-01-18T10:05:11.131Z'
+                  created_at: '2025-01-18T10:05:11.131Z'
+                  mentee_password: null
+                  mentor_password: null
+                  started_at: null
+                  share_link: null
+                  completed_at: null
+                  deleted_at: null
+                  mentor:
+                    user_id: '1'
+                    designation:
+                      - beo
+                      - deo
+                    area_of_expertise:
+                      - educational_leadership
+                      - sqaa
+                    education_qualification: MBA
+                    rating: null
+                    meta: null
+                    stats: null
+                    tags: null
+                    configs: null
+                    visible_to_organizations:
+                      - '1'
+                    external_session_visibility: CURRENT
+                    custom_entity_text: null
+                    experience: null
+                    organization_id: '1'
+                    external_mentee_visibility: CURRENT
+                    mentee_visibility: CURRENT
+                    external_mentor_visibility: CURRENT
+                    mentor_visibility: CURRENT
+                    name: Nevil m
+                    email: nevil@tunerlabs.com
+                    phone: null
+                    is_mentor: true
+                    settings:
+                      chat_enabled: true
+                    image: null
+                    gender: male
+                    created_at: '2025-01-02T20:15:39.878Z'
+                    updated_at: '2025-01-02T20:15:39.878Z'
+                    deleted_at: null
